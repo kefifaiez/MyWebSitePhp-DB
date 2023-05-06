@@ -19,7 +19,7 @@ services:
     # Définition des variables d'environnement pour la création de la base de données
     environment:
       MYSQL_DATABASE: faiez
-      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORDs: password
     # Mappage du port 3306 du système hôte vers le port 3306 du conteneur
     ports:
       - "3306:3306"
