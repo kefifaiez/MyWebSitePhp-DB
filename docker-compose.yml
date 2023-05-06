@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  # Configuration du service Web
+  web:
+    # Construction de l'image du service à partir du Dockerfile du répertoire courant
+    build: .
+    # Mappage du port 8080 du système hôte vers le port 80 du conteneur
+    ports:
+      - "8080:80"
+    # Dépendance du service sur le service de base de données
+    depends_on:
+      - db
+
+  # Configuration du service de base de données
+  db:
+    # Utilisation de l'image Docker officielle de MySQL version 8.0
+    image: mysql:8.0
+    # Définition des variables d'environnement pour la création de la base de données
+    environment:
+      MYSQL_DATABASE: faiez
+      MYSQL_PASSWORD: password
+    # Mappage du port 3306 du système hôte vers le port 3306 du conteneur
+    ports:
+      - "3306:3306"
+    # Utilisation d'un volume pour persister les données de la base de données
+    volumes:
+      - db-data:/var/lib/mysql
+      # Montage du fichier init.sql pour exécuter des commandes SQL lors de la création de la base de données
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    # Utilisation du plugin d'authentification mysql_native_password
+    command: --default-authentication-plugin=mysql_native_password
+
+volumes:
+  # Définition du volume pour persister les données de la base de données
+  db-data:
