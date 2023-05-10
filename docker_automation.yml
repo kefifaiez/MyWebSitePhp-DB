@@ -1,0 +1,29 @@
+---
+- name: Automate Docker image creation and push
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Remove Docker images
+      command: docker rmi -f "{{ item }}"
+      ignore_errors: true
+      with_items:
+        - kefifaiez/webapp
+        - kefifaiez/dbimage
+
+    - name: Build Docker image for web service
+      command: docker build -t kefifaiez/webapp:latest .
+      changed_when: "'Successfully built' in build_result.stdout"
+      register: build_result
+
+    - name: Build Docker image for DB service
+      command: docker build -t kefifaiez/dbimage:latest -f Dockerfile.db .
+      changed_when: "'Successfully built' in build_result.stdout"
+      register: build_result
+
+    - name: Push Docker images to Docker Hub
+      command: docker push "{{ item }}"
+      with_items:
+        - kefifaiez/webapp:latest
+        - kefifaiez/dbimage:latest
+      when: build_result.changed
