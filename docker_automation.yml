@@ -9,6 +9,7 @@
       ignore_errors: true
       with_items:
         - kefifaiez/webapp
+        - kefifaiez/dbimage
 
     - name: Build Docker image for web service
       command: docker build -t kefifaiez/webapp:latest .
@@ -18,3 +19,16 @@
     - name: Push Docker image to Docker Hub
       command: docker push kefifaiez/webapp:latest
       when: build_result.changed
+
+    - name: Remove Docker container for DB service
+      command: docker rm -f db_container
+      ignore_errors: true
+      when: "'Exited' in container_removal.results[*].stdout"
+
+    - name: Remove Docker image for DB service
+      command: docker rmi -f kefifaiez/dbimage
+      ignore_errors: true
+      when: "'kefifaiez/dbimage' in image_removal.results[*].stdout"
+
+    - name: Run Docker Compose
+      command: docker-compose up -d
