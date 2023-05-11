@@ -29,9 +29,13 @@
         username: "{{ dockerhub_username }}"
         password: "{{ dockerhub_password }}"
 
+    - name: Tag Docker image for web service
+      command: docker tag kefifaiez/webapp:latest kefifaiez/webapp:{{ tag_name }}
+      changed_when: false
+
     - name: Push Docker images to Docker Hub
       command: docker push "{{ item }}"
       with_items:
-        - kefifaiez/webapp:latest
+        - kefifaiez/webapp:{{ tag_name }}
         - kefifaiez/dbimage:latest
       when: build_result.changed
