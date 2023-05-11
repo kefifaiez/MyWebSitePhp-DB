@@ -5,9 +5,9 @@ services:
   web:
     # Construction de l'image du service à partir du Dockerfile du répertoire courant
     build: .
-    # Mappage du port 8080 du système hôte vers le port 80 du conteneur
+    # Mappage du port 8090 du système hôte vers le port 80 du conteneur
     ports:
-      - "8080:80"
+      - "8090:80"
     # Dépendance du service sur le service de base de données
     depends_on:
       - db
