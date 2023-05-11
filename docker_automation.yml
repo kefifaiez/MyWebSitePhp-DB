@@ -3,6 +3,18 @@
   hosts: localhost
   gather_facts: false
   tasks:
+    - name: Install python3-pip
+      become: yes
+      apt:
+        name: python3-pip
+        state: present
+
+    - name: Install docker Python module
+      become: yes
+      pip:
+        name: docker
+        executable: pip3
+
     - name: Stop and remove containers
       command: docker-compose down --volumes --remove-orphans
       ignore_errors: true
@@ -22,6 +34,7 @@
         tag: db
         repository: kefifaiez/testfaiez-db
         push: yes
+        source: pull
         state: present
 
     - name: Tag and push Web image
@@ -30,5 +43,5 @@
         tag: web
         repository: kefifaiez/testfaiez-web
         push: yes
+        source: pull
         state: present
-
