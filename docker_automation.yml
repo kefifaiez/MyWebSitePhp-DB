@@ -1,18 +1,19 @@
-- name: Automate Docker image creation and push
+- name: Automate Docker image creation, tag, push, and application deployment
   hosts: localhost
   gather_facts: false
 
   vars:
     dockerhub_username: "kefifaiez"
     dockerhub_password: "faiez*faiez"
+    tag_name: "v1.0"  # Définissez le nom du tag souhaité
 
   tasks:
     - name: Remove Docker images
       command: docker rmi -f "{{ item }}"
       ignore_errors: true
       with_items:
-        - kefifaiez/webapp
-        - kefifaiez/dbimage
+        - kefifaiez/webapp:{{ tag_name }}
+        - kefifaiez/dbimage:latest
 
     - name: Build Docker image for web service
       command: docker build -t kefifaiez/webapp:latest .
@@ -39,3 +40,16 @@
         - kefifaiez/webapp:{{ tag_name }}
         - kefifaiez/dbimage:latest
       when: build_result.changed
+
+    - name: Deploy web application and database
+      docker_compose:
+        project_src: /path/to/your/docker-compose.yml  # Chemin vers votre fichier docker-compose.yml
+        project_name: webapp
+        state: present
+        recreate: true
+      register: deploy_result
+      when: build_result.changed
+
+    - name: Display deployment result
+      debug:
+        var: deploy_result
