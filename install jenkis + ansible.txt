@@ -1,19 +1,51 @@
 Install Jenkins:
 ```sh
-sudo apt update -y
-sudo apt install openjdk-11-jdk
+#!/bin/bash
+
+# Mettre à jour les packages du système
+sudo apt update
+
+# Installer Java Development Kit (JDK)
 sudo apt install openjdk-11-jdk -y
-java -version
-readlink -f $(which java)
-JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
-echo $JAVA_HOME
-export JAVA_HOME
-sudo apt install wget 
-wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
-sudo sh -c 'echo deb https://pkg.jenkins.io/debian-stable binary/ > \
-/etc/apt/sources.list.d/jenkins.list'
-sudo apt update -y 
-sudo apt-get install jenkins -y
+
+# Ajouter le référentiel Jenkins au système
+wget -q -O - https://pkg.jenkins.io/debian/jenkins.io.key | sudo apt-key add -
+sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'
+
+# Mettre à jour les packages du système à nouveau
+sudo apt update
+
+# Installer Jenkins
+sudo apt install jenkins -y
+
+# Démarrer le service Jenkins
+sudo systemctl start jenkins
+
+# Activer le démarrage automatique de Jenkins au démarrage du système
+sudo systemctl enable jenkins
+
+# Afficher l'état du service Jenkins
+sudo systemctl status jenkins
+
 ```
+Une fois que vous avez installé Jenkins sur votre système Ubuntu, vous pouvez y accéder depuis votre navigateur en suivant les étapes suivantes :
+
+Ouvrez votre navigateur web préféré.
+Entrez l'adresse IP de votre serveur Ubuntu suivi du port 8080. Par exemple : http://adresse_ip_ubuntu:8080.
+Vous devriez voir la page d'accueil de Jenkins avec un formulaire pour déverrouiller Jenkins. Pour cela, vous devez récupérer la clé secrète depuis le fichier initialAdminPassword.
+Pour récupérer la clé secrète, ouvrez un terminal et exécutez la commande suivante :
+
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+
+Copiez la clé secrète affichée.
+Retournez à la page d'accueil de Jenkins dans votre navigateur et collez la clé secrète dans le champ correspondant.
+Cliquez sur le bouton "Continuer".
+Sur la page suivante, sélectionnez l'option "Installer les plugins suggérés" ou "Installer les plugins recommandés" pour installer les plugins de base.
+Attendez que l'installation des plugins soit terminée.
+Une fois l'installation terminée, vous devez créer un utilisateur administrateur.
+Remplissez le formulaire avec les informations demandées pour créer un utilisateur administrateur.
+Cliquez sur "Enregistrer et continuer".
+Jenkins est maintenant prêt à être utilisé ! Vous pouvez commencer à configurer vos projets et pipelines.
+
 install ansible
 sudo apt install ansible -y
