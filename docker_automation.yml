@@ -1,55 +1,34 @@
-- name: Automate Docker image creation, tag, push, and application deployment
+---
+- name: Deploy and push Docker images
   hosts: localhost
   gather_facts: false
-
-  vars:
-    dockerhub_username: "kefifaiez"
-    dockerhub_password: "faiez*faiez"
-    tag_name: "v1.0"  # Définissez le nom du tag souhaité
-
   tasks:
-    - name: Remove Docker images
-      command: docker rmi -f "{{ item }}"
+    - name: Stop and remove containers
+      command: docker-compose down --volumes --remove-orphans
       ignore_errors: true
-      with_items:
-        - kefifaiez/webapp:{{ tag_name }}
-        - kefifaiez/dbimage:latest
 
-    - name: Build Docker image for web service
-      command: docker build -t kefifaiez/webapp:latest .
-      changed_when: "'Successfully built' in build_result.stdout"
-      register: build_result
+    - name: Remove existing images
+      command: docker rmi -f mywebsitephp-db-web:latest mysql:8.0
+      args:
+        warn: false
+      ignore_errors: true
 
-    - name: Build Docker image for DB service
-      command: docker build -t kefifaiez/dbimage:latest -f Dockerfile.db .
-      changed_when: "'Successfully built' in build_result.stdout"
-      register: build_result
+    - name: Start containers
+      command: docker-compose up -d
 
-    - name: Log in to Docker Hub
-      docker_login:
-        username: "{{ dockerhub_username }}"
-        password: "{{ dockerhub_password }}"
-
-    - name: Tag Docker image for web service
-      command: docker tag kefifaiez/webapp:latest kefifaiez/webapp:{{ tag_name }}
-      changed_when: false
-
-    - name: Push Docker images to Docker Hub
-      command: docker push "{{ item }}"
-      with_items:
-        - kefifaiez/webapp:{{ tag_name }}
-        - kefifaiez/dbimage:latest
-      when: build_result.changed
-
-    - name: Deploy web application and database
-      docker_compose:
-        project_src: /path/to/your/docker-compose.yml  # Chemin vers votre fichier docker-compose.yml
-        project_name: webapp
+    - name: Tag and push MySQL image
+      docker_image:
+        name: mysql:8.0
+        tag: db
+        repository: kefifaiez/testfaiez-db
+        push: yes
         state: present
-        recreate: true
-      register: deploy_result
-      when: build_result.changed
 
-    - name: Display deployment result
-      debug:
-        var: deploy_result
+    - name: Tag and push Web image
+      docker_image:
+        name: mywebsitephp-db-web:latest
+        tag: web
+        repository: kefifaiez/testfaiez-web
+        push: yes
+        state: present
+
