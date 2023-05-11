@@ -1,7 +1,10 @@
----
 - name: Automate Docker image creation and push
   hosts: localhost
   gather_facts: false
+
+  vars:
+    dockerhub_username: "kefifaiez"
+    dockerhub_password: "faiez*faiez"
 
   tasks:
     - name: Remove Docker images
@@ -16,19 +19,19 @@
       changed_when: "'Successfully built' in build_result.stdout"
       register: build_result
 
-    - name: Push Docker image to Docker Hub
-      command: docker push kefifaiez/webapp:latest
+    - name: Build Docker image for DB service
+      command: docker build -t kefifaiez/dbimage:latest -f Dockerfile.db .
+      changed_when: "'Successfully built' in build_result.stdout"
+      register: build_result
+
+    - name: Log in to Docker Hub
+      docker_login:
+        username: "{{ dockerhub_username }}"
+        password: "{{ dockerhub_password }}"
+
+    - name: Push Docker images to Docker Hub
+      command: docker push "{{ item }}"
+      with_items:
+        - kefifaiez/webapp:latest
+        - kefifaiez/dbimage:latest
       when: build_result.changed
-
-    - name: Remove Docker container for DB service
-      command: docker rm -f db_container
-      ignore_errors: true
-      when: "'Exited' in container_removal.results[*].stdout"
-
-    - name: Remove Docker image for DB service
-      command: docker rmi -f kefifaiez/dbimage
-      ignore_errors: true
-      when: "'kefifaiez/dbimage' in image_removal.results[*].stdout"
-
-    - name: Run Docker Compose
-      command: docker-compose up -d
